@@ -105,3 +105,16 @@ def test_missing_file_exits_2(tmp_path):
     result = run([str(nonexistent_file), "--required", "id,name"])
     assert result.returncode == 2
     assert "error: file not found:" in result.stderr
+# 6. Exit Code 1: Row blank in two required columns
+def test_row_blank_in_two_required_columns_exits_1(tmp_path):
+    csv_file = tmp_path / "two_blanks.csv"
+    csv_file.write_text(
+        "id,name,email\n"
+        "1,Asha,asha@example.com\n"
+        "2,,\n",
+        encoding="utf-8",
+    )
+    result = run([str(csv_file), "--required", "id,name,email"])
+    assert result.returncode == 1
+    assert "row 3: blank column name" in result.stdout
+    assert "row 3: blank column email" in result.stdout
